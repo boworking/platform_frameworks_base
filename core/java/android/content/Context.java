@@ -2903,6 +2903,11 @@ public abstract class Context {
     public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
 
     /**
+     * ZJP added for AFW rump up.
+     */
+    public static final String LIGHTNESS_WIZARD_SERVICE = "lightness_wizard";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
