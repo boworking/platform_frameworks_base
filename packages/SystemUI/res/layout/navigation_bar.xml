@@ -166,6 +166,20 @@
             systemui:orientation="horizontal"
             android:layout_gravity="top"
             />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/panel"
+        android:layout_marginBottom="-100dip"
+        android:layout_gravity="bottom|center"
+        android:background="#eeffaa"
+        android:layout_height="300dip">
+        <TextView
+            android:layout_width="300dip"
+            android:layout_height="wrap_content"
+	    android:textColor = "#00aaff"
+            android:text="@string/str_test"/>
+    </LinearLayout>
     </FrameLayout>
 
     <FrameLayout android:id="@+id/rot90"
@@ -310,6 +324,32 @@
             systemui:orientation="vertical"
             android:layout_gravity="top"
             />
+	<LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/panel"
+        android:layout_marginBottom="-100dip"
+        android:layout_gravity="bottom|center"
+        android:background="#eeffaa"
+        android:layout_height="300dip">
+          <TextView
+            android:layout_width="300dip"
+            android:layout_height="wrap_content"
+	    android:textColor = "#00aaff"
+            android:text="@string/str_test"/>
+    	</LinearLayout>
     </FrameLayout>
-
+   <!-- <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/panel"
+        android:layout_marginBottom="0dip"
+        android:layout_gravity="bottom|center"
+        android:background="#eeffaa"
+        android:layout_height="300dip">
+        <TextView
+            android:layout_width="300dip"
+            android:layout_height="wrap_content"
+	    android:textColor = "#00aaff"
+            android:text="@string/str_test"/>
+    </LinearLayout>
+-->
 </com.android.systemui.statusbar.phone.NavigationBarView>

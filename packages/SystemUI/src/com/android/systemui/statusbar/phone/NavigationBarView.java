@@ -55,6 +55,10 @@ public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
 
+    private boolean mStart;
+    private boolean mExpanded;
+    private CallbackForHandlePanel mCallbackForHandlePanel;
+
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
 
@@ -205,6 +209,11 @@ public class NavigationBarView extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         initDownStates(event);
+	if (mStart) {
+	    mExpanded = mCallbackForHandlePanel.animate(event);	
+	    Log.e("TAG", "mExpanded=" + mExpanded);
+	    return true;
+	}
         if (!mDelegateIntercepted && mTaskSwitchHelper.onTouchEvent(event)) {
             return true;
         }
@@ -226,6 +235,7 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        Log.e("TAG","onInterceptTouchEvent");
         initDownStates(event);
         boolean intercept = mTaskSwitchHelper.onInterceptTouchEvent(event);
         if (!intercept) {
@@ -237,7 +247,18 @@ public class NavigationBarView extends LinearLayout {
             mDelegateHelper.onInterceptTouchEvent(cancelEvent);
             cancelEvent.recycle();
         }
-        return intercept;
+        //return intercept;
+	switch (event.getAction()) {
+	    case MotionEvent.ACTION_DOWN:
+		if ((!mExpanded && event.getY() > getMeasuredHeight() -50) || mExpanded) {
+		    mStart = true;
+		} else {
+		    mStart = false;		
+		}
+		Log.e("TAG","start = " + mStart);
+		break;
+	}
+	return mStart ? mStart : intercept;
     }
 
     private H mHandler = new H();
@@ -639,4 +660,15 @@ public class NavigationBarView extends LinearLayout {
     public interface OnVerticalChangedListener {
         void onVerticalChanged(boolean isVertical);
     }
+
+    public void setmCallbackForHandlePanel(CallbackForHandlePanel mCallbackForHandlePanel) {
+        this.mCallbackForHandlePanel = mCallbackForHandlePanel;
+    }
+	
+    public interface CallbackForHandlePanel {
+    	boolean animate(MotionEvent event);
+    }
+
+
+
 }

@@ -29,6 +29,13 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 
+
+import android.graphics.Color;
+import android.widget.FrameLayout;
+import android.widget.Toast;
+import android.app.Activity;
+
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
@@ -175,8 +182,19 @@ import java.util.Collections;
 import java.util.List;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
-        DragDownHelper.DragDownCallback, ActivityStarter {
+        DragDownHelper.DragDownCallback, ActivityStarter, NavigationBarView.CallbackForHandlePanel {
     static final String TAG = "PhoneStatusBar";
+
+    private int startX;
+    private int startY;
+    private int mParentBottom;
+    private int mPanelHeight;
+    private boolean upFling;
+    private boolean mExpanded;
+    private boolean mClosed;
+    private LinearLayout mPanel;
+
+
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
@@ -605,6 +623,103 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         notifyUserAboutHiddenNotifications();
     }
 
+
+    @Override
+    public boolean animate(MotionEvent event) {
+    	mParentBottom = mNavigationBarView.getBottom();
+	return movePanel(event);
+    }
+
+    private boolean movePanel(MotionEvent motionEvent) {
+    	int l = mPanel.getLeft();
+        int r = mPanel.getRight();
+        int t = mPanel.getTop();
+        int b = mPanel.getBottom();
+        switch (motionEvent.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+//                Log.e("TAG","down");
+                if(mExpanded){
+                    mExpanded =false;
+                }
+                if(mClosed){
+                    mClosed = false;
+                }
+                startX = (int) motionEvent.getRawX();
+                startY = (int) motionEvent.getRawY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int newX = (int) motionEvent.getRawX();
+                int newY = (int) motionEvent.getRawY();
+
+                int dx = newX - startX;
+                int dy = newY - startY;
+                //Log.e("TAG","dy="+dy);
+
+                //记录上下滑动的趋势
+                if(dy < 0 || dy==0){
+                    upFling = true;
+                } else {
+                    upFling = false;
+                }
+
+                //更新panel的布局位置
+                int newt = t + dy;
+                int newb = b + dy;
+
+               Log.e("TAG","newb="+newb+",newt="+newt+",ParentBottom="+mParentBottom            								+",Hei"+mPanel.getMeasuredHeight());
+                //ignore the l,r location
+                int newl = l + dx;
+                int newr = r + dx;
+
+                //判断是否已经滑倒最顶端
+                if(upFling) {
+                    if(newb < mPanelHeight) {
+                        newb = mParentBottom;
+                        newt = mParentBottom - mPanelHeight;
+                        mExpanded = true;
+                    }
+                }else {
+                    if(newt>mParentBottom ){
+                        newt = mParentBottom;
+                        newb = mParentBottom + mPanelHeight;
+                        Log.e("TAG","Closed");
+                        mClosed = true;
+//                    break;
+                    }
+                }
+
+                //re-layout the panel
+                mPanel.layout(l, newt, r, newb);
+                startX = (int) motionEvent.getRawX();
+                startY = (int) motionEvent.getRawY();
+                break;
+            case MotionEvent.ACTION_CANCEL://when cancel or up, judge whether pass half,if so,move to top
+            case MotionEvent.ACTION_UP:
+//                Log.e("TAG","up");
+                //判断移动的位置是否超过一半，若超过，则打开或是关闭
+                if(mExpanded||mClosed){
+                    break;
+                }
+                Log.e("TAG","upFling="+upFling);
+                if(upFling){
+                    Log.e("TAG","Totop");
+                    mPanel.layout(l,mParentBottom - mPanelHeight,r,mParentBottom);
+                    mExpanded = true;
+
+                } else {
+                    //关闭panel
+                    Log.e("TAG","ToBottom");
+                       mPanel.layout(l, mParentBottom, r, mPanelHeight + mParentBottom);
+//                        Log.e("TAG", "b=" + b);
+                       mClosed = true;
+                    mExpanded = false;
+                }
+
+                break;
+        }
+        return mExpanded;
+    }
+
     // ================================================================================
     // Constructing the view
     // ================================================================================
@@ -668,8 +783,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (showNav) {
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+		
+   		
+		mPanel = (LinearLayout) mNavigationBarView.findViewById(R.id.panel);
+   		int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+  		int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+		mPanel.measure(w,h);
+		mPanelHeight = mPanel.getMeasuredHeight();
+		mNavigationBarView.setmCallbackForHandlePanel(this);
+		Log.e("TAG", "mPanelHeight = " + mPanelHeight);                 
 
-                mNavigationBarView.setDisabledFlags(mDisabled);
+		mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
                 mNavigationBarView.setOnVerticalChangedListener(
                         new NavigationBarView.OnVerticalChangedListener() {
