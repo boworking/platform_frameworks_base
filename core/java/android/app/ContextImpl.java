@@ -110,6 +110,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IUserManager;
+import android.os.LightnessWizardManager;
+import android.os.ILightnessWizard;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
@@ -761,6 +763,18 @@ class ContextImpl extends Context {
             public Object createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(APPWIDGET_SERVICE);
                 return new AppWidgetManager(ctx, IAppWidgetService.Stub.asInterface(b));
+            }});
+
+        // zjp
+        registerService(LIGHTNESS_WIZARD_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+            	try{
+            		IBinder b = ServiceManager.getService(LIGHTNESS_WIZARD_SERVICE);
+                    return new LightnessWizardManager(ctx,ILightnessWizard.Stub.asInterface(b));
+            	} catch (Exception e) {
+            		e.printStackTrace();
+            		return null;
+            	}
             }});
     }
 
