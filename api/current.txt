@@ -7220,6 +7220,7 @@ package android.content {
     field public static final java.lang.String KEYGUARD_SERVICE = "keyguard";
     field public static final java.lang.String LAUNCHER_APPS_SERVICE = "launcherapps";
     field public static final java.lang.String LAYOUT_INFLATER_SERVICE = "layout_inflater";
+    field public static final java.lang.String LIGHTNESS_WIZARD_SERVICE = "lightness_wizard";
     field public static final java.lang.String LOCATION_SERVICE = "location";
     field public static final java.lang.String MEDIA_PROJECTION_SERVICE = "media_projection";
     field public static final java.lang.String MEDIA_ROUTER_SERVICE = "media_router";
@@ -21774,6 +21775,35 @@ package android.os {
 
   public abstract interface IInterface {
     method public abstract android.os.IBinder asBinder();
+  }
+
+  public abstract interface ILightnessWizard implements android.os.IInterface {
+    method public abstract boolean isRunning() throws android.os.RemoteException;
+    method public abstract void onSwitch(int) throws android.os.RemoteException;
+  }
+
+  public static abstract class ILightnessWizard.Stub extends android.os.Binder implements android.os.ILightnessWizard {
+    ctor public ILightnessWizard.Stub();
+    method public android.os.IBinder asBinder();
+    method public static android.os.ILightnessWizard asInterface(android.os.IBinder);
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
+  }
+
+  public class LightnessWizardManager {
+    method public static android.os.LightnessWizardManager getInstance(android.content.Context);
+    method public void onSwitch(int) throws android.os.RemoteException;
+    method public void startLightnessWizardPolicy();
+    method public void stopLightnessWizardPolicy();
+  }
+
+  public class LightnessWizardService extends android.os.ILightnessWizard.Stub {
+    ctor public LightnessWizardService(android.content.Context);
+    method public boolean isRunning() throws android.os.RemoteException;
+    method public void onSwitch(int) throws android.os.RemoteException;
+    field public static final int LIGHTNESS_WIZARD_LIGHT_ON_SCREEN = 3; // 0x3
+    field public static final int LIGHTNESS_WIZARD_SHUTDOWN_SCREEN = 4; // 0x4
+    field public static final int LIGHTNESS_WIZARD_SLEEP = 2; // 0x2
+    field public static final int LIGHTNESS_WIZARD_START = 1; // 0x1
   }
 
   public final class Looper {
